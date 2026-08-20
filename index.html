@@ -59,6 +59,23 @@
     box-shadow: 0 0 0 3px var(--gold-bright), 0 0 22px 6px rgba(255,215,106,.55);
     animation: pulseGlow 2.6s ease-in-out infinite;
   }
+  .mask{
+    position:absolute; inset:0;
+    border-radius: 6px;
+    background-repeat:no-repeat;
+    filter: grayscale(1) brightness(.5) contrast(.85) blur(.4px);
+    transition: opacity .7s ease, filter .7s ease;
+    pointer-events:none;
+  }
+  .mask::after{
+    content:"";
+    position:absolute; inset:0;
+    background: rgba(10,9,12,.32);
+    border-radius: 6px;
+  }
+  .spot.collected .mask{
+    opacity:0;
+  }
   @keyframes pulseGlow{
     0%,100%{ box-shadow: 0 0 0 3px var(--gold-bright), 0 0 16px 4px rgba(255,215,106,.4);}
     50%{ box-shadow: 0 0 0 3px var(--gold-bright), 0 0 26px 10px rgba(255,215,106,.7);}
@@ -317,7 +334,14 @@ const TOTAL = SPOTS.length;
 /* ===================== 狀態（純前端 Demo：重整頁面即清空，不接資料庫） ===================== */
 let collected = new Set();
 
-/* ===================== 產生站點覆蓋層 ===================== */
+/* ===================== 產生站點覆蓋層 =====================
+   每個站點疊一塊「同一張海報圖、但套灰階濾鏡」的遮罩，
+   用 background-position 精準對齊到該站點在整張圖上的位置，
+   集點前顯示灰霧遮罩、集點後淡出露出原本全彩照片。
+*/
+const CANVAS_W = 1400;               // 對應 #poster 的顯示寬度（見 CSS）
+const CANVAS_H = CANVAS_W * (5031/3579); // 依海報原始比例換算顯示高度
+
 const spotsLayer = document.getElementById('spots');
 SPOTS.forEach(s=>{
   const el = document.createElement('div');
@@ -327,7 +351,18 @@ SPOTS.forEach(s=>{
   el.style.top = s.top+'%';
   el.style.width = s.w+'%';
   el.style.height = s.h+'%';
-  el.innerHTML = '<svg class="stamp" viewBox="0 0 64 64"><circle cx="32" cy="32" r="29" fill="rgba(13,12,16,.35)" stroke="#ffd76a" stroke-width="3"/><path d="M19 33l8 8 17-19" fill="none" stroke="#ffd76a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  const mask = document.createElement('div');
+  mask.className = 'mask';
+  mask.style.backgroundImage = "url('map.jpg')";
+  mask.style.backgroundSize = CANVAS_W+'px '+CANVAS_H+'px';
+  mask.style.backgroundPosition = (-(s.left/100*CANVAS_W))+'px '+(-(s.top/100*CANVAS_H))+'px';
+  el.appendChild(mask);
+
+  const stamp = document.createElement('div');
+  stamp.innerHTML = '<svg class="stamp" viewBox="0 0 64 64"><circle cx="32" cy="32" r="29" fill="rgba(13,12,16,.35)" stroke="#ffd76a" stroke-width="3"/><path d="M19 33l8 8 17-19" fill="none" stroke="#ffd76a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  el.appendChild(stamp.firstElementChild);
+
   spotsLayer.appendChild(el);
 });
 
