@@ -52,6 +52,7 @@
   .spot{
     position:absolute;
     border-radius: 6px;
+    overflow:hidden;
     box-shadow: 0 0 0 0 rgba(255,215,106,0);
     transition: box-shadow .4s ease;
   }
@@ -63,14 +64,14 @@
     position:absolute; inset:0;
     border-radius: 6px;
     background-repeat:no-repeat;
-    filter: grayscale(1) brightness(.5) contrast(.85) blur(.4px);
+    filter: grayscale(1) brightness(.32) contrast(.75) blur(2.5px);
     transition: opacity .7s ease, filter .7s ease;
     pointer-events:none;
   }
   .mask::after{
     content:"";
     position:absolute; inset:0;
-    background: rgba(10,9,12,.32);
+    background: rgba(6,5,7,.55);
     border-radius: 6px;
   }
   .spot.collected .mask{
